@@ -78,6 +78,8 @@ describe("conftest-kubernetes provider", () => {
         test: testFromConfig(module, module.testConfigs[0]),
         force: true,
         forceBuild: true,
+        devModeServiceNames: [],
+        hotReloadServiceNames: [],
       })
 
       const key = testTask.getKey()

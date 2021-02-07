@@ -135,6 +135,8 @@ export class TestCommand extends Command<Args, Opts> {
           filterNames,
           force,
           forceBuild,
+          devModeServiceNames: [],
+          hotReloadServiceNames: [],
         })
       )
     )
@@ -159,6 +161,8 @@ export class TestCommand extends Command<Args, Opts> {
               filterNames,
               force,
               forceBuild,
+              devModeServiceNames: [],
+              hotReloadServiceNames: [],
             })
           )
         )
