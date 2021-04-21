@@ -22,6 +22,8 @@ import { safeDump, safeLoad } from "js-yaml"
 import { ConfigurationError } from "../../exceptions"
 import { ensureMutagenDaemon } from "./mutagen"
 import { joiIdentifier } from "../../config/common"
+import { KubernetesPluginContext } from "./config"
+import { prepareConnectionOpts } from "./kubectl"
 
 const syncUtilImageName = "gardendev/k8s-sync:0.1.1"
 const mutagenAgentPath = "/.garden/mutagen-agent"
@@ -138,7 +140,6 @@ export async function startDevModeSync({
   if (spec.sync.length === 0) {
     return
   }
-
   namespace = target.metadata.namespace || namespace
   const resourceName = `${target.kind}/${target.metadata.name}`
   const key = `${target.kind}--${namespace}--${target.metadata.name}`
@@ -172,15 +173,20 @@ export async function startDevModeSync({
     const mutagen = ctx.tools["kubernetes.mutagen"]
     const dataDir = await ensureMutagenDaemon(log, mutagen)
 
+    const k8sCtx = <KubernetesPluginContext>ctx
+
     // Configure Mutagen with all the syncs
     const syncConfigs = fromPairs(
       spec.sync.map((s, i) => {
+        const connectionOpts = prepareConnectionOpts({
+          provider: k8sCtx.provider,
+          namespace,
+        })
         const command = [
           kubectlPath,
           "exec",
           "-i",
-          "--namespace",
-          namespace,
+          ...connectionOpts,
           "--container",
           containerName,
           `${target.kind}/${target.metadata.name}`,
